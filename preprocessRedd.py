@@ -9,7 +9,7 @@ import re
 #from nilmtk.dataset_converters import convert_redd
 
 path = 'SmartHome/sorted/'
-dest = 'sorted_min_max/'
+dest = 'list_test_mins_channel/'
 
 def processData():
     for root, dirs, files in os.walk(path):
@@ -61,7 +61,9 @@ def processData():
 # <duration>
 def filterData(current, ofile, thres_min, thres_max):
     # print type(ofile)
-    channel_no = os.path.basename(ofile[:-4]).split('_')[1]
+    # print os.path.basename(ofile[:-4]).split('_')[2]
+    channel_no = os.path.basename(ofile[:-4]).split('_')[2]
+    timethres = 6
     print channel_no
     with open(current, 'rb') as f, open(ofile, 'wb') as out:
         writer = csv.writer(out)
@@ -75,7 +77,9 @@ def filterData(current, ofile, thres_min, thres_max):
         #f = sorted(inp, key=operator.itemgetter(0))
         s_comb_range = []
         dur_comb_range = []
+        chann_range = []
         count = 1
+        p_hour = datetime.datetime.fromtimestamp(long(frst[0])).strftime('%Y-%m-%d %H')
         for row in csv.reader(f):
             #fields = row[0].split()
             #if float(fields[1]) > start: # and long(fields[0]) >= prev+1:
@@ -85,7 +89,6 @@ def filterData(current, ofile, thres_min, thres_max):
             #print s_range
             s_time = long(s_range[0])   # Starting range time
             s_voltage = float(s_range[1])   # Starting range voltage
-            p_hour = datetime.datetime.fromtimestamp(s_time).strftime('%Y-%m-%d %H')
             if s_voltage > thres_min and s_voltage < thres_max:
                 try:
                     e_range = f.next().split()                  # End time row
@@ -93,7 +96,7 @@ def filterData(current, ofile, thres_min, thres_max):
                     e_voltage = float(e_range[1]) # End range voltage
                     cnt = diff
                     bool = 0
-                    while e_time == s_time+cnt and (e_voltage > thres_min and e_voltage < thres_max):
+                    while e_time == s_time+cnt+timethres and (e_voltage > thres_min and e_voltage < thres_max):
                         e_min_1 = e_range
                         e_prev_time = long(e_range[0])   # End range time
                         e_range = f.next().split()                  # End time row
@@ -107,27 +110,39 @@ def filterData(current, ofile, thres_min, thres_max):
                         e_min_1[0] = datetime.datetime.fromtimestamp(e_time).strftime('%Y-%m-%d %H:%M:%S')
                         duration = (e_time - s_time) * 1.0 / 60.0
                         duration = round(duration, 2)
-                        #e_min_1[0] = duration
-                        #print duration
-                        #print s_range, "---", e_min_1
+                        # e_min_1[0] = duration
+                        # print duration
+                        # print s_range, "---", e_min_1
                         c_hour = datetime.datetime.fromtimestamp(e_time).strftime('%Y-%m-%d %H')
                         # print p_hour
                         # print c_hour
-                        #if duration > 0.05:
-                        # if (p_hour == c_hour):
-                        #     print "Inside if"
-                        #     s_comb_range = s_comb_range + [datetime.datetime.fromtimestamp(s_time).strftime('%M')]
-                        #     dur_comb_range = dur_comb_range + [duration]
-                        # else:
-                        #     print "Inside else"
-                        #     p_hour = c_hour
-                        #     writer.writerow(s_comb_range)
-                        #     writer.writerow(dur_comb_range)
-                        writer.writerow([count,"60"])
-                        writer.writerow([channel_no])
-                        writer.writerow([datetime.datetime.fromtimestamp(s_time).strftime('%M')])
-                        writer.writerow([duration])
-                        count += 1
+                        # if duration > 0.05:
+                        if (p_hour == c_hour):
+                            # print "Inside if"
+                            chann_range = chann_range + [channel_no]
+                            s_comb_range = s_comb_range \
+                            + [datetime.datetime.fromtimestamp(s_time).strftime('%M')]
+                            dur_comb_range = dur_comb_range + [duration]
+                        else:
+                            # print "Inside else"
+                            p_hour = c_hour
+                            chann_range = chann_range + [channel_no]
+                            s_comb_range = s_comb_range \
+                            + [datetime.datetime.fromtimestamp(s_time).strftime('%M')]
+                            dur_comb_range = dur_comb_range + [duration]
+                            if s_comb_range and dur_comb_range:
+                                # print "s_comb_range is not empty"
+                                writer.writerow(chann_range)
+                                writer.writerow(s_comb_range)
+                                writer.writerow(dur_comb_range)
+                                s_comb_range = []
+                                dur_comb_range = []
+                                chann_range = []
+                        # writer.writerow([count,"60"])
+                        # writer.writerow([channel_no])
+                        # writer.writerow([datetime.datetime.fromtimestamp(s_time).strftime('%M')])
+                        # writer.writerow([duration])
+                        # count += 1
                             #writer.writerow(["duration", duration])
                 except(StopIteration):
                     print "Done Processing ", current
