@@ -1,7 +1,7 @@
 import csv
 import numpy as np
 
-with open('redd-main.txt', 'rb') as f, open('redd-1.txt', 'wb') as out:
+with open('redd-1.dat', 'rb') as f, open('redd-1.txt', 'wb') as out:
     writer = csv.writer(out)
     count = 1
     # Remove the first line with total number of examples.
