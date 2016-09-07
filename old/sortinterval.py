@@ -20,14 +20,6 @@ for root, dirs, files in os.walk(os.curdir):
                         s_time = f.next().split(',')
                         dur = f.next().split(',')
                         # print e_type
-                        #s_time = [x.replace(",,+",",") for x in s_time]
-                        # s_time = [x.replace("^?,,+",",") for x in s_time]
-                        # dur = [x.replace("^?,,+",",") for x in dur]
-                        # s_time = [x.replace("\n","") for x in s_time]
-                        # dur = [x.replace("\n","") for x in dur]
-                        # print row
-                        # print s_time
-                        # print dur
                         l1 = [int(i) for i in e_type]
                         l2 = [int(i) for i in s_time]
                         l3 = [float(i) for i in dur]

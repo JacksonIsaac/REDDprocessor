@@ -6,11 +6,10 @@ import numpy as np
 import datetime
 import operator
 import re
-from subprocess import call
 #from nilmtk.dataset_converters import convert_redd
 
-path = 'SmartHome/sorted'
-dest = 'redd-test/'
+path = 'SmartHome/sorted/'
+dest = 'list_test_mins_channel/'
 
 def processData():
     for root, dirs, files in os.walk(path):
@@ -63,8 +62,8 @@ def processData():
 def filterData(current, ofile, thres_min, thres_max):
     # print type(ofile)
     # print os.path.basename(ofile[:-4]).split('_')[2]
-    channel_no = os.path.basename(ofile[:-4]).split('_')[-1]
-    timethres = 3
+    channel_no = os.path.basename(ofile[:-4]).split('_')[2]
+    timethres = 6
     print channel_no
     with open(current, 'rb') as f, open(ofile, 'wb') as out:
         writer = csv.writer(out)
@@ -73,7 +72,7 @@ def filterData(current, ofile, thres_min, thres_max):
         frst = f.readline().split()
         sec = f.readline().split()
         f.seek(0)
-        diff = 3 # long(sec[0])-long(frst[0])
+        diff = long(sec[0])-long(frst[0])
         #inp = csv.reader(f)
         #f = sorted(inp, key=operator.itemgetter(0))
         s_comb_range = []
@@ -97,7 +96,7 @@ def filterData(current, ofile, thres_min, thres_max):
                     e_voltage = float(e_range[1]) # End range voltage
                     cnt = diff
                     bool = 0
-                    while e_time <= s_time+cnt+timethres and (e_voltage > thres_min and e_voltage < thres_max):
+                    while e_time == s_time+cnt+timethres and (e_voltage > thres_min and e_voltage < thres_max):
                         e_min_1 = e_range
                         e_prev_time = long(e_range[0])   # End range time
                         e_range = f.next().split()                  # End time row
@@ -131,7 +130,6 @@ def filterData(current, ofile, thres_min, thres_max):
                             s_comb_range = s_comb_range \
                             + [datetime.datetime.fromtimestamp(s_time).strftime('%M')]
                             dur_comb_range = dur_comb_range + [duration]
-                            # Write empty since hour is different
                             if s_comb_range and dur_comb_range:
                                 # print "s_comb_range is not empty"
                                 writer.writerow(chann_range)
