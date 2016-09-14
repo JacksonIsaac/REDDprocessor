@@ -12,5 +12,5 @@ preprocessor for REDD created as part of thesis at TUM.
 :argdo %s/,\n/\r/g | update
 4. python sortintervals.py
 5. vim -O *.txt
-6. argdo %s/,/\ /g | update
+:argdo %s/,/\ /g | update
 ```
